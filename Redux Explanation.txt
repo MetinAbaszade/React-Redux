@@ -1,0 +1,161 @@
+
+ADDITIONAL AND MOST IMPORTANT NOTES ARE IN THE CODE!!
+ADDITIONAL AND MOST IMPORTANT NOTES ARE IN THE CODE!!
+ADDITIONAL AND MOST IMPORTANT NOTES ARE IN THE CODE!!
+
+state - stored information at a particular point in time that a program or application can use to control its behavior. This concept is applicable to both front-end and back-end development, although it's often discussed more in the context of front-end, particularly when dealing with user interfaces. In front-end development, particularly in JavaScript libraries and frameworks like React, Vue, Angular etc., "state" typically refers to the data that a component maintains and can change over time. This could be anything that affects what the user sees or can do in the application - for example, the text in an input field, whether a dropdown menu is open or closed, the data that's been fetched from a server and is being displayed, and so on. Changes to this state trigger re-rendering of the component or parts of it. In back-end development, state can refer to a variety of things. For example, in a web server, the state could include current sessions, cached data, database connections, and so on. In a database, the state would be the current data stored in the database. State could also refer to the data stored in a user's session or in cookies on the user's machine. It's worth noting that managing state can become complex as applications grow, particularly on the front-end. This has led to the development of state management libraries and patterns, like Redux or Context API for React, Vuex or Pinia for Vue.js, NgRx or Akita for Angular and so forth. State is mutable and can change over time, in contrast with props, which are immutable and fixed for a given component instance.
+
+Redux is not exclusive to React. It is a predictable state container for JavaScript apps and can be used with any JavaScript framework or library, including Angular, Vue, Ember, and more. React and Redux pair well together for several reasons:
+
+1. Unidirectional data flow - React is built around the idea of unidirectional data flow, which is also a central concept in Redux. This means that data in a React+Redux application has a predictable flow, which makes the application easier to understand and debug. More explained:
+
+In React, each component has its own state (an object where data specific to the component is stored). Data is passed from parent components to child components through "props", forming a "top-down" or "unidirectional" data flow. When state changes, the component re-renders, displaying the new state. If a child component needs to change the state, it can't do it directly. Instead, the parent provides a function (again, passed through props) that the child can call to request a state change. So, the data flow here is: 
+
+parent state -> child props -> child calls function -> parent changes state -> new state flows down to child through props.
+
+Redux, on the other hand, provides a single global "store" that holds the entire state of your application. This state is read by many components and can be changed only by dispatching "actions" which describe the changes to be made. These actions are handled by "reducers" - pure functions that take the current state and an action, and return a new state. So, the data flow in Redux is:
+ 
+component dispatches action -> reducer calculates new state -> new state is stored -> new state flows down to components.
+
+In other words, Redux applies the same concept of unidirectional data flow as React, but at a larger scale, for the entire application and because they both follow the same principle of unidirectional data flow, this makes the data flow in the application easy to understand.
+
+2. Component-based architecture - React's component-based architecture fits well with Redux's state management. Each component in React can connect with the Redux store and can trigger actions to update the state, and it re-renders whenever the parts of the state it's connected to get updated.
+
+3. Community support - When Redux was released, it quickly gained popularity among React developers. As a result, there are a lot of resources, middleware, and tools available for using Redux with React, and many developers are familiar with this combination.
+
+4. Scalability - For large applications with complex state management needs, Redux provides a scalable solution that works well with React. It helps manage the application state in a predictable way, which is valuable when the application grows and becomes more complex.
+
+
+1. Pure Redux: Redux is a state management library for JavaScript apps. It allows you to manage global state in a predictable manner, which is particularly useful for large applications. Redux is not tied to React and can be used with any UI layer. However, it's most commonly used with React.
+In pure Redux, you create a store with createStore, and you can update the state by dispatching actions to the store. Actions are plain JavaScript objects with a type property, and optionally additional properties. When an action is dispatched, Redux calls the reducer function with the current state and the action. The reducer returns the new state based on the action type.
+Components can subscribe to the store to be notified when the state changes. When the state changes, the component can call store.getState() to get the new state.
+Here's an example of a Redux store and a component that uses the store:
+
+import { createStore } from 'redux';
+
+// Reducer
+function counter(state = 0, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state + 1;
+    case 'DECREMENT':
+      return state - 1;
+    default:
+      return state;
+  }
+}
+
+// Store
+let store = createStore(counter);
+
+// Component
+function Counter() {
+  // Get the current state
+  let count = store.getState();
+
+  // Subscribe to changes
+  useEffect(() => {
+    let unsubscribe = store.subscribe(() => {
+      // Update the component state when the store state changes
+      setCount(store.getState());
+    });
+    return unsubscribe;
+  }, []);
+
+  // ...
+}
+
+
+2. React-Redux: React-Redux is the official Redux UI binding library for React. It provides the Provider component and the useSelector and useDispatch hooks, which make it easier to use Redux with React.
+The Provider component makes the Redux store available to nested components. Under the hood, it uses the React context API to pass the store down the component tree.
+The useSelector hook allows components to select data from the Redux store state. It takes a selector function as an argument, calls it with the entire store state, and returns the result.
+The useDispatch hook returns a reference to the dispatch function from the Redux store. You can use it to dispatch actions.
+Here's an example of a React-Redux app:
+import { Provider, useSelector, useDispatch } from 'react-redux';
+
+// Store
+let store = createStore(counter);
+
+// Component
+function Counter() {
+  let count = useSelector(state => state);
+  let dispatch = useDispatch();
+
+  return (
+    <div>
+      Count: {count}
+      <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
+      <button onClick={() => dispatch({ type: 'DECREMENT' })}>-</button>
+    </div>
+  );
+}
+
+// App
+function App() {
+  return (
+    <Provider store={store}>
+      <Counter />
+    </Provider>
+  );
+}
+
+
+3. Redux Toolkit: Redux Toolkit is the official, opinionated, batteries-included toolset for efficient Redux development. It provides utilities that simplify several Redux use cases, including store setup, defining reducers, immutable update logic, and more. Redux Toolkit includes createSlice, which generates action creators and action types that correspond to the reducers and state. This eliminates the need to define action types and action creators manually. createSlice also uses the Immer library under the hood, which allows you to write simpler mutable logic in your reducers. 
+
+In Redux, the state of your whole application is stored in an object tree within a single store. In order to maintain this state and to allow it to be updated, Redux uses reducer functions. However, when the application grows bigger and the state tree becomes larger, managing all of this in one reducer function can become a bit unwieldy. That's where the idea of "slicing" comes in. Rather than managing all of your state in a single large reducer, you can split your state tree into "slices," and manage each of these slices with its own reducer. Each slice reducer is responsible for a specific slice of the Redux state tree, and all of the slice reducers are combined together to create the root reducer for the Redux store. This approach can make the code more maintainable and easier to reason about.
+
+The 'configureStore' function simplifies the store setup process and automatically includes the most common Redux middleware in your store, including Redux Thunk and middleware for handling the immutable state updates provided by Immer.
+Here's an example of a Redux Toolkit app:
+
+import { configureStore, createSlice, Provider, useDispatch, useSelector } from '@reduxjs/toolkit';
+
+// Slice
+const counter = createSlice({
+  name: 'counter',
+  initialState: 0,
+  reducers: {
+    increment: state => state + 1,
+    decrement: state => state - 1,
+  },
+});
+
+// Store
+const store = configureStore({
+  reducer: counter.reducer,
+});
+
+// Component
+function Counter() {
+  const count = useSelector(state => state);
+  const dispatch = useDispatch();
+
+  return (
+    <div>
+      Count: {count}
+      <button onClick={() => dispatch(counter.actions.increment())}>+</button>
+      <button onClick={() => dispatch(counter.actions.decrement())}>-</button>
+    </div>
+  );
+}
+
+// App
+function App() {
+  return (
+    <Provider store={store}>
+      <Counter />
+    </Provider>
+  );
+}
+
+To summarize, pure Redux provides the core functionality for state management, React-Redux adds a React binding layer that makes it easier to use Redux with React, and Redux Toolkit further simplifies Redux development by providing utility functions and encouraging best practices.
+
+ADDITIONAL AND MOST IMPORTANT NOTES ARE IN THE CODE!!!
+ADDITIONAL AND MOST IMPORTANT NOTES ARE IN THE CODE!!
+ADDITIONAL AND MOST IMPORTANT NOTES ARE IN THE CODE!!
+
+
+
+
+
+
+
